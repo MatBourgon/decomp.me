@@ -17,3 +17,14 @@
 
     grid-column: span var(--num-columns, 1);
 }
+
+.checkbox-manage {
+    align-self: center;
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 8px;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 
 import Image from "next/image";
 import Link from "@/components/Link";
@@ -19,7 +19,7 @@ import PlatformLink from "./PlatformLink";
 import { calculateScorePercent, percentToString } from "./ScoreBadge";
 import styles from "./ScratchItem.module.scss";
 import UserLink from "./user/UserLink";
-
+import Checkbox from "@/app/(navfooter)/settings/Checkbox";
 type MatchPercentSource = api.TerseScratch | api.BestFork;
 
 function isMatchPercentOverride(source: MatchPercentSource) {
@@ -144,13 +144,35 @@ function ScratchItemRow({
     showOwner = true,
     showPlatform = true,
     showPresetOrCompiler = true,
+    canManage = false,
+    subscribeItem = null,
 }: {
     scratch: api.TerseScratch;
     children?: ReactNode;
     showOwner?: boolean;
     showPlatform?: boolean;
     showPresetOrCompiler?: boolean;
+    canManage?: boolean;
+    subscribeItem?: (scratch: api.TerseScratch, value: boolean) => void;
 }) {
+    let [markForDelete, setMarkForDelete] = useState(false);
+
+    // Unmark for delete scratches when we hide the option
+    useEffect(() => {
+        if (!canManage) {
+            setMarkForDelete(false);
+        }
+    }, [canManage]);
+
+    if (subscribeItem && scratch)
+    {
+        useEffect(() => {
+            subscribeItem(scratch, markForDelete);
+        }, [markForDelete]);
+
+        subscribeItem(scratch, markForDelete);
+    }
+
     return (
         <li className={styles.item}>
             <div className={styles.scratch}>
@@ -177,6 +199,15 @@ function ScratchItemRow({
                         </div>
                     )}
                 </div>
+                <div>
+                    {canManage && (
+                        <Checkbox
+                            checked={markForDelete}
+                            onChange={setMarkForDelete}
+                            label="Mark for Delete"
+                        ></Checkbox>
+                    )}
+                </div>
             </div>
         </li>
     );
@@ -185,12 +216,25 @@ function ScratchItemRow({
 export function ScratchItem({
     scratch,
     children,
-}: { scratch: api.TerseScratch; children?: ReactNode }) {
+}: {
+    scratch: api.TerseScratch;
+    children?: ReactNode;
+    canManage?: boolean; /* we only need this parameter for ScratchItemNoOwner */
+    subscribeItem?: (scratch: api.TerseScratch, value: boolean) => void; /* we only need this parameter for ScratchItemNoOwner */
+}) {
     return <ScratchItemRow scratch={scratch}>{children}</ScratchItemRow>;
 }
 
-export function ScratchItemNoOwner({ scratch }: { scratch: api.TerseScratch }) {
-    return <ScratchItemRow scratch={scratch} showOwner={false} />;
+export function ScratchItemNoOwner({
+    scratch,
+    canManage,
+    subscribeItem
+}: {
+    scratch: api.TerseScratch,
+    canManage?: boolean,
+    subscribeItem?: (scratch: api.TerseScratch, value: boolean) => void,
+}) {
+    return <ScratchItemRow scratch={scratch} canManage={canManage} subscribeItem={subscribeItem} showOwner={false} />;
 }
 
 export function ScratchItemPlatformList({
