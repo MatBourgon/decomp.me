@@ -1,6 +1,6 @@
 "use client";
 
-import { type JSX, type ReactNode, useCallback, useState } from "react";
+import { type JSX, type ReactNode, useState } from "react";
 
 import Link from "@/components/Link";
 
@@ -43,7 +43,6 @@ function useDeleteSelectedScratches(results: Map<string, [TerseScratch, boolean]
             )
         ) {
             for(const [scratch, markedForDelete] of filteredList) {
-                console.log(`${scratch.slug}: ${markedForDelete}`);
                 if (markedForDelete) {
                     await api.delete_(scratchUrl(scratch), {});
                 }
